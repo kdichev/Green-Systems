@@ -21,6 +21,7 @@ function getNow() {
 function runPump() {
   state.pump.running = true;
   console.log(chalk.cyan(getNow(), "pump is initialized"));
+  // relay.on();
 	setTimeout(() =>{
 		stopPump();
 	}, state.pump.duration)
@@ -29,6 +30,7 @@ function runPump() {
 function stopPump() {
   state.pump.running = false;
 	console.log(chalk.red(getNow(), "pump is stopped"));
+  // relay.off();
 }
 
 function loop() {
@@ -48,5 +50,6 @@ function loop() {
 }
 
 board.on("ready", () => {
+  // var relay = new five.Relay(10);
   loop();
 });
