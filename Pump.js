@@ -15,7 +15,7 @@ var state = {
 
 // return now in format (12:00:00)
 function getNow() {
-  return moment().format('h:mm:ss');
+  return moment().format('HH:mm:ss');
 }
 
 function runPump() {
@@ -39,8 +39,8 @@ function loop() {
     } else {
       console.log(chalk.green(getNow(), "System is working"));
     }
-    if (getNow() === "11:49:00") {
     // check if it is ready to start the pump
+    if (getNow() === "08:00:00" || getNow() === "16:30:00") {
       runPump();
     }
     loop();
