@@ -52,4 +52,8 @@ function loop() {
 board.on("ready", () => {
   // var relay = new five.Relay(10);
   loop();
+
+  // this.repl.inject({
+  //   relay: relay
+  // });
 });
