@@ -13,6 +13,7 @@ var state = {
 	}
 };
 
+// return now in format (12:00:00)
 function getNow() {
   return moment().format('h:mm:ss');
 }
@@ -32,12 +33,14 @@ function stopPump() {
 
 function loop() {
   setTimeout(() => {
+    // check state of loop
     if (state.pump.running === true) {
       console.log(chalk.cyan(getNow(), "Pumping water"));
     } else {
       console.log(chalk.green(getNow(), "System is working"));
     }
     if (getNow() === "11:49:00") {
+    // check if it is ready to start the pump
       runPump();
     }
     loop();
