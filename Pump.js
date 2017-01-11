@@ -7,52 +7,82 @@ var board = new five.Board({
 });
 
 var state = {
-	"pump": {
-		"running": false,
-    "duration": 10000
-	}
+ "pump": {
+  "running": false,
+     // duration of pumping
+     "duration": 10000,
+     // when to water
+     "wateringTimes": [moment().add(10, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss')]
+ },
+   "system": {
+     // tick for loop
+     "tick": 1000,
+     "counter": 0,
+     "days": 0,
+     "startTime": null
+  }
+};
+
+function getStats() {
+ var now = moment().add(24, 'hours');
+ process.stdout.write('\033c');
+   console.log("Watering times: ", state.pump.wateringTimes[0], state.pump.wateringTimes[1], state.pump.wateringTimes[2]);
+   console.log("Duration of watering: ", state.pump.duration / 1000, "seconds");
+   console.log("%------------------------------------------%")
+ console.log("System has been running for", now.diff(state.system.startTime, 'days'), "Since :", state.system.startTime);
+   console.log("has run", state.system.counter , "times today");
+ if(state.pump.running != true) {
+   console.log(chalk.bgRed(getTime(), "Pump is stopped"));
+ } else {
+      console.log(chalk.bgCyan(getTime(), "Pumping water"));
+ }
+    console.log(chalk.green(getTime(), "System is working"));
 };
 
 // return now in format (12:00:00)
-function getNow() {
+function getTime() {
   return moment().format('HH:mm:ss');
+};
+
+function shouldPump() {
+  var now = getTime();
+  var wateringTimesLocal = state.pump.wateringTimes;
+  for(var i = 0; i < wateringTimesLocal.length; i++) {
+    if(wateringTimesLocal[i] === now) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function runPump() {
   state.pump.running = true;
-  console.log(chalk.cyan(getNow(), "pump is initialized"));
+  state.system.counter++;
   // relay.on();
-	setTimeout(() =>{
-		stopPump();
-	}, state.pump.duration)
-}
+ setTimeout(() =>{
+  stopPump();
+ }, state.pump.duration);
+};
 
 function stopPump() {
   state.pump.running = false;
-	console.log(chalk.red(getNow(), "pump is stopped"));
   // relay.off();
-}
+};
 
 function loop() {
+  getStats();
   setTimeout(() => {
-    // check state of loop
-    if (state.pump.running === true) {
-      console.log(chalk.cyan(getNow(), "Pumping water"));
-    } else {
-      console.log(chalk.green(getNow(), "System is working"));
-    }
-    // check if it is ready to start the pump
-    if (getNow() === "08:00:00" || getNow() === "16:30:00") {
+    if (shouldPump()) {
       runPump();
     }
     loop();
-  }, 1000)
-}
+  }, state.system.tick);
+};
 
 board.on("ready", () => {
   // var relay = new five.Relay(10);
+  state.system.startTime = moment();
   loop();
-
   // this.repl.inject({
   //   relay: relay
   // });
