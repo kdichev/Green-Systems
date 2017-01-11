@@ -10,7 +10,9 @@ var state = {
 	"pump": {
 		"running": false,
     // duration of pumping
-    "duration": 10000
+    "duration": 10000,
+    // when to water
+    "wateringTimes": ["09:00:00", "11:00:00", "14:40:00"]
 	},
   "system": {
     // tick for loop
@@ -47,7 +49,7 @@ function loop() {
       console.log(chalk.green(getNow(), "System is working"));
     }
     // check if it is ready to start the pump
-    if (getNow() === "09:13:00" || getNow() === "09:13:30" || getNow() === "09:56:30") {
+    if (getNow() === state.pump.wateringTimes[0] || getNow() === state.pump.wateringTimes[1] || getNow() === state.pump.wateringTimes[2]) {
       runPump();
     }
     loop();
@@ -55,6 +57,8 @@ function loop() {
 };
 
 board.on("ready", () => {
+  console.log("Watering times: ", state.pump.wateringTimes[0], state.pump.wateringTimes[1], state.pump.wateringTimes[2]);
+  console.log("Duration of watering: ", state.pump.duration / 1000, "seconds");
   // var relay = new five.Relay(10);
   loop();
   // this.repl.inject({
