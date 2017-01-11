@@ -12,7 +12,7 @@ var state = {
     // duration of pumping
     "duration": 10000,
     // when to water
-    "wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "20:00:00", "24:00:00", moment().add(10, "s").format('HH:mm:ss')]
+    "wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "20:00:00", "24:00:00", moment().add(10, "s").format('HH:mm:ss'), moment().add(20, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss')]
 	},
   "system": {
     // tick for loop
