@@ -25,7 +25,7 @@ function getNow() {
 
 function runPump() {
   state.pump.running = true;
-  console.log(chalk.cyan(getNow(), "pump is initialized"));
+  console.log(chalk.inverse(getNow(), "Pump is starting"));
   // relay.on();
 	setTimeout(() =>{
 		stopPump();
@@ -34,7 +34,7 @@ function runPump() {
 
 function stopPump() {
   state.pump.running = false;
-	console.log(chalk.red(getNow(), "pump is stopped"));
+	console.log(chalk.bgRed(getNow(), "Pump is stopped"));
   // relay.off();
 };
 
@@ -47,7 +47,7 @@ function loop() {
       console.log(chalk.green(getNow(), "System is working"));
     }
     // check if it is ready to start the pump
-    if (getNow() === "09:13:00" || getNow() === "09:13:30" || getNow() === "09:14:00") {
+    if (getNow() === "09:13:00" || getNow() === "09:13:30" || getNow() === "09:56:30") {
       runPump();
     }
     loop();
@@ -57,7 +57,6 @@ function loop() {
 board.on("ready", () => {
   // var relay = new five.Relay(10);
   loop();
-
   // this.repl.inject({
   //   relay: relay
   // });
