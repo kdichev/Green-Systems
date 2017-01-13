@@ -1,19 +1,20 @@
 var five = require('johnny-five');
 var moment = require('moment');
-var chalk = require('chalk');
 
 var board = new five.Board({
-  port: "COM4"
+  port: "COM4",
+  repl: false,
 });
 
 var state = {
  "pump": {
    "running": false,
    // duration of pumping
-   "duration": 5000,
+   "duration": 90000,
    "counter": 0,
    // when to water
-   "wateringTimes": [moment().add(10, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss'), moment().add(50, "s").format('HH:mm:ss'), moment().add(70, "s").format('HH:mm:ss')]
+   //"wateringTimes": [moment().add(10, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss'), moment().add(50, "s").format('HH:mm:ss'), moment().add(70, "s").format('HH:mm:ss')]
+   "wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "18:00:00"]
  },
    "system": {
      // tick for loop
@@ -37,7 +38,7 @@ board.on("exit", () => {
 });
 
 function loop(relay) {
-  if (shouldPump()) {
+  if (shouldPumpRun()) {
     runPump(relay);
   }
   if (state.pump.running) {
@@ -48,8 +49,6 @@ function loop(relay) {
 function runPump(relay) {
   state.pump.running = true;
   relay.open();
-  // if shouldPumpStop true => stopPump();
-
 };
 
 function stopPump(relay) {
@@ -58,7 +57,7 @@ function stopPump(relay) {
   relay.close();
 };
 
-function shouldPump() {
+function shouldPumpRun() {
   var now = getTime();
   var wateringTimesLocal = state.pump.wateringTimes;
   for(var i = 0; i < wateringTimesLocal.length; i++) {
