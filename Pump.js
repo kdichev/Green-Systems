@@ -23,21 +23,21 @@ var state = {
   }
 };
 
-function getStats() {
- var now = moment().add(24, 'hours');
- process.stdout.write('\033c');
-   console.log("Watering times: ", state.pump.wateringTimes[0], state.pump.wateringTimes[1], state.pump.wateringTimes[2]);
-   console.log("Duration of watering: ", state.pump.duration / 1000, "seconds");
-   console.log("%------------------------------------------%")
- console.log("System has been running for", now.diff(state.system.startTime, 'days'), "Since :", state.system.startTime);
-   console.log("has run", state.system.counter , "times today");
- if(state.pump.running != true) {
-   console.log(chalk.bgRed(getTime(), "Pump is stopped"));
- } else {
-      console.log(chalk.bgCyan(getTime(), "Pumping water"));
- }
-    console.log(chalk.green(getTime(), "System is working"));
-};
+// function getStats() {
+//  var now = moment().add(24, 'hours');
+//  process.stdout.write('\033c');
+//    console.log("Watering times: ", state.pump.wateringTimes[0], state.pump.wateringTimes[1], state.pump.wateringTimes[2]);
+//    console.log("Duration of watering: ", state.pump.duration / 1000, "seconds");
+//    console.log("%------------------------------------------%")
+//  console.log("System has been running for", now.diff(state.system.startTime, 'days'), "Since :", state.system.startTime);
+//    console.log("has run", state.system.counter , "times today");
+//  if(state.pump.running != true) {
+//    console.log(chalk.bgRed(getTime(), "Pump is stopped"));
+//  } else {
+//       console.log(chalk.bgCyan(getTime(), "Pumping water"));
+//  }
+//     console.log(chalk.green(getTime(), "System is working"));
+// };
 
 // return now in format (12:00:00)
 function getTime() {
@@ -70,7 +70,7 @@ function stopPump() {
 };
 
 function loop() {
-  getStats();
+  // getStats();
   setTimeout(() => {
     if (shouldPump()) {
       runPump();
@@ -79,11 +79,23 @@ function loop() {
   }, state.system.tick);
 };
 
+function relayLoop(relay) {
+  console.log("relay loop start");
+  setTimeout(() => {
+    relay.on();
+  }, 3000);
+  setTimeout(() => {
+    relay.off();
+    relayLoop(relay);
+  }, 1000)
+}
+
 board.on("ready", () => {
-  // var relay = new five.Relay(10);
+  var relay = new five.Relay(13);
+  // relayLoop(relay);
+  board.loop(1000, function() {
+    relayLoop(relay);
+  });
   state.system.startTime = moment();
-  loop();
-  // this.repl.inject({
-  //   relay: relay
-  // });
+  //loop();
 });
