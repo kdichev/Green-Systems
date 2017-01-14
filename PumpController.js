@@ -1,7 +1,23 @@
 var five = require('johnny-five');
+const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
 var moment = require('moment');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
+
+
+app.use(express.static(__dirname + '/public'));
+app.get('/', function(req, res, next) {
+  res.sendFile(__dirname + '/index.html')
+});
+
+const port = process.env.PORT || 3000;
+
+
+server.listen(port);
+console.log(`Server listening on http://localhost:${port}`);
+
 
 var board = new five.Board({
   port: "COM4",
