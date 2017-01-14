@@ -14,7 +14,7 @@ var state = {
    "counter": 0,
    // when to water
    //"wateringTimes": [moment().add(10, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss'), moment().add(50, "s").format('HH:mm:ss'), moment().add(70, "s").format('HH:mm:ss')]
-   "wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "18:00:00"]
+   "wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "18:00:00", "22:43:00"]
  },
    "system": {
      // tick for loop
@@ -24,6 +24,7 @@ var state = {
 };
 
 board.on("ready", () => {
+  console.log("Initialized");
   var relay = new five.Relay(13);
   relay.close();
   board.loop(state.system.tick, function() {
@@ -33,8 +34,13 @@ board.on("ready", () => {
 
 // on app close
 board.on("exit", () => {
+  console.log("Exiting");
   var relay = new five.Relay(13);
   relay.close();
+});
+
+board.on("connect", function() {
+  console.log("Connected");
 });
 
 function loop(relay) {
