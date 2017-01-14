@@ -1,5 +1,7 @@
 var five = require('johnny-five');
 var moment = require('moment');
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
 
 var board = new five.Board({
   port: "COM4",
@@ -10,11 +12,11 @@ var state = {
  "pump": {
    "running": false,
    // duration of pumping
-   "duration": 90000,
+   "duration": 5000,
    "counter": 0,
    // when to water
-   //"wateringTimes": [moment().add(10, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss'), moment().add(50, "s").format('HH:mm:ss'), moment().add(70, "s").format('HH:mm:ss')]
-   "wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "18:00:00", "22:43:00"]
+   "wateringTimes": [moment().add(10, "s").format('HH:mm:ss'), moment().add(30, "s").format('HH:mm:ss'), moment().add(50, "s").format('HH:mm:ss'), moment().add(70, "s").format('HH:mm:ss')]
+   //"wateringTimes": ["08:00:00", "12:00:00", "16:00:00", "18:00:00", "22:43:00"]
  },
    "system": {
      // tick for loop
@@ -24,7 +26,7 @@ var state = {
 };
 
 board.on("ready", () => {
-  console.log("Initialized");
+  eventEmitter.emit('init');
   var relay = new five.Relay(13);
   relay.close();
   board.loop(state.system.tick, function() {
@@ -34,12 +36,12 @@ board.on("ready", () => {
 
 // on app close
 board.on("exit", () => {
-  console.log("Exiting");
+  eventEmitter.emit('exit');
   var relay = new five.Relay(13);
   relay.close();
 });
 
-board.on("connect", function() {
+board.on("init", function() {
   console.log("Connected");
 });
 
@@ -48,16 +50,19 @@ function loop(relay) {
     runPump(relay);
   }
   if (state.pump.running) {
+    eventEmitter.emit('pumping');
     shouldPumpStop(relay);
   }
 };
 
 function runPump(relay) {
+  eventEmitter.emit('pumpOn');
   state.pump.running = true;
   relay.open();
 };
 
 function stopPump(relay) {
+  eventEmitter.emit('pumpOff');
   state.pump.running = false;
   state.pump.counter = 0;
   relay.close();
@@ -85,3 +90,30 @@ function shouldPumpStop(relay) {
 function getTime() {
   return moment().format(state.system.dateFormat);
 };
+
+
+var pumpListenerOn = () => {
+   console.log('Pump is on');
+};
+
+var pumpListenerOff = () => {
+   console.log('Pump is off');
+};
+
+var appListenerExit = () => {
+   console.log("Exiting");
+};
+
+var appListenerReady = () => {
+  console.log("Initialized");
+};
+
+var appListenerPumping = () => {
+  console.log("Pumping water");
+};
+
+eventEmitter.addListener('pumpOn', pumpListenerOn);
+eventEmitter.addListener('pumpOff', pumpListenerOff);
+eventEmitter.addListener('exit', appListenerExit);
+eventEmitter.addListener('init', appListenerReady);
+eventEmitter.addListener('pumping', appListenerPumping);
