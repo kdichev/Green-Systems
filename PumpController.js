@@ -25,27 +25,6 @@ var state = {
   }
 };
 
-var pumpListenerOn = () => {
-   console.log('Pump is on');
-};
-
-var pumpListenerOff = () => {
-   console.log('Pump is off');
-};
-
-var appListenerExit = () => {
-   console.log("Exiting");
-};
-
-var appListenerReady = () => {
-  console.log("Initialized");
-};
-
-eventEmitter.addListener('pumpOn', pumpListenerOn);
-eventEmitter.addListener('pumpOff', pumpListenerOff);
-eventEmitter.addListener('exit', appListenerExit);
-eventEmitter.addListener('init', appListenerReady);
-
 board.on("ready", () => {
   eventEmitter.emit('init');
   var relay = new five.Relay(13);
@@ -62,7 +41,7 @@ board.on("exit", () => {
   relay.close();
 });
 
-board.on("connect", function() {
+board.on("init", function() {
   console.log("Connected");
 });
 
@@ -71,6 +50,7 @@ function loop(relay) {
     runPump(relay);
   }
   if (state.pump.running) {
+    eventEmitter.emit('pumping');
     shouldPumpStop(relay);
   }
 };
@@ -110,3 +90,30 @@ function shouldPumpStop(relay) {
 function getTime() {
   return moment().format(state.system.dateFormat);
 };
+
+
+var pumpListenerOn = () => {
+   console.log('Pump is on');
+};
+
+var pumpListenerOff = () => {
+   console.log('Pump is off');
+};
+
+var appListenerExit = () => {
+   console.log("Exiting");
+};
+
+var appListenerReady = () => {
+  console.log("Initialized");
+};
+
+var appListenerPumping = () => {
+  console.log("Pumping water");
+};
+
+eventEmitter.addListener('pumpOn', pumpListenerOn);
+eventEmitter.addListener('pumpOff', pumpListenerOff);
+eventEmitter.addListener('exit', appListenerExit);
+eventEmitter.addListener('init', appListenerReady);
+eventEmitter.addListener('pumping', appListenerPumping);
