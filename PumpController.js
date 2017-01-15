@@ -14,12 +14,7 @@ app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-});
+
 
 var board = new five.Board({
   port: "COM4",
@@ -50,7 +45,13 @@ board.on("ready", () => {
   board.loop(state.system.tick, function() {
     loop(relay);
   });
-
+  io.on('connection', function (socket) {
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+    run(relay);
+      console.log(data);
+    });
+  });
 
 });
 
