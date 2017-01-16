@@ -9,8 +9,16 @@ const app = express();
 const server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-app.get('/', function(req, res, next) {
+app.get('/', (req, res, next) => {
   res.sendFile(__dirname + '/index.html')
+});
+
+var array = [];
+
+app.get('/pump', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  console.log(req.query);
+  res.send(JSON.stringify({ a: 1 }));
 });
 
 const port = process.env.PORT || 1337;
