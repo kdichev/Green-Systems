@@ -4,20 +4,26 @@ var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
 
-var app = require('express')();
-var server = require('http').Server(app);
+const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-server.listen(80);
-
-app.get('/', function (req, res) {
-  res.sendfile(__dirname + '/index.html');
+app.get('/', function(req, res, next) {
+  res.sendFile(__dirname + '/index.html')
 });
+
+const port = process.env.PORT || 1337;
+
+
+server.listen(port);
+console.log(`Server listening on http://localhost:${port}`);
+
 
 
 
 var board = new five.Board({
-  port: "COM4",
+  port: "COM3",
   repl: false,
 });
 
@@ -49,7 +55,7 @@ board.on("ready", () => {
     socket.emit('news', { hello: 'world' });
     socket.on('my other event', function (data) {
     relay.toggle();
-      console.log(data);
+    console.log(data);
     });
   });
 
