@@ -1,0 +1,26 @@
+<!doctype html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+      <div id="state"></div>
+      <img src="public/favicon.ico" className="App-logo" alt="logo" />
+
+      </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>
+
+      <script>
+        var port = 1337;
+        var hostName = window.location.hostname;
+        var socket = io.connect(hostName);
+        socket.on('initialized', function (data) {
+          console.log(data);
+          socket.emit('toggle');
+        });
+      </script>
+    </body>
+</html>
