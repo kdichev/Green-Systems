@@ -1,1 +1,3 @@
 # Green-Systems
+
+npm start 
