@@ -2,36 +2,9 @@ var five = require('johnny-five');
 var moment = require('moment');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
-
-
-const express = require('express');
-const app = express();
-const server = require('http').createServer(app);
-var io = require('socket.io')(server);
-
-app.get('/', (req, res, next) => {
-  res.sendFile(__dirname + '/index.html')
-});
-
-var array = [];
-
-app.get('/pump', (req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
-  console.log(req.query);
-  res.send(JSON.stringify({ a: 1 }));
-});
-
-const port = process.env.PORT || 1337;
-
-
-server.listen(port);
-console.log(`Server listening on http://localhost:${port}`);
-
-
-
-
+// var st = require('./bundle.js');
 var board = new five.Board({
-  port: "COM3",
+  port: "COM4",
   repl: false,
 });
 
@@ -52,110 +25,106 @@ var state = {
   }
 };
 
-board.on("ready", () => {
-  eventEmitter.emit('init');
-  var relay = new five.Relay(13);
-  relay.close();
-  board.loop(state.system.tick, function() {
-    loop(relay);
-  });
-  io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-    relay.toggle();
-    console.log(data);
-    });
+function init(cb){
+  board.on("ready", () => {
+    eventEmitter.emit('init');
+    var relay = new five.Relay(13);
+    relay.close();
+    // board.loop(state.system.tick, function() {
+    //   loop(relay);
+    // });
+    cb(relay);
   });
 
-});
+  // on app close
+  board.on("exit", () => {
+    eventEmitter.emit('exit');
+    var relay = new five.Relay(13);
+    relay.close();
+  });
+  // TODO: research when is fixed
+  // board.on("connect", function() {
+  //   console.log("Connected");
+  // });
 
-// on app close
-board.on("exit", () => {
-  eventEmitter.emit('exit');
-  var relay = new five.Relay(13);
-  relay.close();
-});
-// TODO: research when is fixed
-// board.on("connect", function() {
-//   console.log("Connected");
-// });
-
-function loop(relay) {
-  if (shouldRun()) {
-    run(relay);
-  }
-  if (shouldStop()) {
-    eventEmitter.emit('pumping');
-    stop(relay);
-  }
-};
-
-function run(relay) {
-  eventEmitter.emit('pumpOn');
-  state.pump.running = true;
-  relay.open();
-};
-
-function stop(relay) {
-  eventEmitter.emit('pumpOff');
-  state.pump.running = false;
-  state.pump.counter = 0;
-  relay.close();
-};
-
-/* shouldRun
-    return boolean
-*/
-function shouldRun() {
-  var now = getTime();
-  var wateringTimesLocal = state.pump.wateringTimes;
-  for(var i = 0; i < wateringTimesLocal.length; i++) {
-    if(wateringTimesLocal[i] === now) {
-      return true;
+  function loop(relay) {
+    if (shouldRun()) {
+      run(relay);
     }
-  }
-  return false;
-};
+    if (shouldStop()) {
+      eventEmitter.emit('pumping');
+      stop(relay);
+    }
+  };
 
-function shouldStop() {
-  if (!state.pump.running) {
+  function run(relay) {
+    eventEmitter.emit('pumpOn');
+    state.pump.running = true;
+    relay.open();
+  };
+
+  function stop(relay) {
+    eventEmitter.emit('pumpOff');
+    state.pump.running = false;
+    state.pump.counter = 0;
+    relay.close();
+  };
+
+  /* shouldRun
+      return boolean
+  */
+  function shouldRun() {
+    var now = getTime();
+    var wateringTimesLocal = state.pump.wateringTimes;
+    for(var i = 0; i < wateringTimesLocal.length; i++) {
+      if(wateringTimesLocal[i] === now) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  function shouldStop() {
+    if (!state.pump.running) {
+      return false
+    }
+    state.pump.counter++;
+    pumpCounterToMilliseconds = state.pump.counter * 1000;
+    if (pumpCounterToMilliseconds === state.pump.duration) {
+      return true
+    }
     return false
-  }
-  state.pump.counter++;
-  pumpCounterToMilliseconds = state.pump.counter * 1000;
-  if (pumpCounterToMilliseconds === state.pump.duration) {
-    return true
-  }
-  return false
-};
+  };
 
-function getTime() {
-  return moment().format(state.system.dateFormat);
-};
+  function getTime() {
+    return moment().format(state.system.dateFormat);
+  };
 
 
-var pumpListenerOn = () => {
-   console.log('Pump is on');
-};
+  var pumpListenerOn = () => {
+     console.log('Pump is on');
+  };
 
-var pumpListenerOff = () => {
-   console.log('Pump is off');
-};
+  var pumpListenerOff = () => {
+     console.log('Pump is off');
+  };
 
-var appListenerExit = () => {
-   console.log("Exiting");
-};
+  var appListenerExit = () => {
+     console.log("Exiting");
+  };
 
-var appListenerReady = () => {
-  console.log("Initialized");
-};
+  var appListenerReady = () => {
+    console.log("Initialized");
+  };
 
-var appListenerPumping = () => {
-  console.log("Pumping water");
-};
+  var appListenerPumping = () => {
+    console.log("Pumping water");
+  };
 
-eventEmitter.addListener('pumpOn', pumpListenerOn);
-eventEmitter.addListener('pumpOff', pumpListenerOff);
-eventEmitter.addListener('exit', appListenerExit);
-eventEmitter.addListener('init', appListenerReady);
-eventEmitter.addListener('pumping', appListenerPumping);
+  eventEmitter.addListener('pumpOn', pumpListenerOn);
+  eventEmitter.addListener('pumpOff', pumpListenerOff);
+  eventEmitter.addListener('exit', appListenerExit);
+  eventEmitter.addListener('init', appListenerReady);
+  eventEmitter.addListener('pumping', appListenerPumping);
+}
+exports.init = init;

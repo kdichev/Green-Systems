@@ -1,6 +1,9 @@
 {
   "name": "test",
   "version": "0.0.1",
+  "scripts": {
+    "start" : "start cmd.exe /K nodemon server.js"
+  },
   "dependencies": {
     "chalk": "^1.1.3",
     "express": "^4.14.0",
@@ -8,5 +11,8 @@
     "johnny-five": "latest",
     "moment": "^2.17.1",
     "socket.io": "^1.7.2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }
